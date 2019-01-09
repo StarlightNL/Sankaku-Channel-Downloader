@@ -53,6 +53,7 @@ namespace SankakuDownloader
         void ToggleState(bool state)
         {
             _blacklist.IsEnabled = state;
+            _seperatelist.IsEnabled = state;
             _checkSkipExisting.IsEnabled = state;
             _checkSkipVideo.IsEnabled = state;
             _limit.IsEnabled = state;
@@ -105,6 +106,7 @@ namespace SankakuDownloader
                 ToggleState(false);
 
                 ActiveViewModel.SaveData(SaveFileLocation);
+
                 await ActiveViewModel.StartDownloading();
             }
             catch (Exception ex)

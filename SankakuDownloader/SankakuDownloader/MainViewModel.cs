@@ -15,9 +15,9 @@ namespace SankakuDownloader
     public class MainViewModel : INotifyPropertyChanged
     {
         #region Private Fields
-        string username, query, blacklist, location, loginstatus = "User is not logged in!";
+        string username, query, blacklist, seperatelist, location, loginstatus = "User is not logged in!";
         int spage = 1, limit = 50, maxdcount = 0, maxfs = 0, minsc = 0, minfc = 0;
-        bool? skipvid, cd = false, skipef = true, resizeonly = false;
+        bool? skipvid, movevid, cd = false, skipef = true, resizeonly = false;
         SynchronizationContext UIContext;
         CancellationTokenSource csrc;
         #endregion
@@ -30,10 +30,12 @@ namespace SankakuDownloader
         public int Limit { get => limit; set { limit = value; Changed(); } }
         public string Query { get => query; set { query = value; Changed(); } }
         public string Blacklist { get => blacklist; set { blacklist = value; Changed(); } }
+        public string Seperatelist { get => seperatelist; set { seperatelist = value; Changed(); } }
         public int MaxDownloadCount { get => maxdcount; set { maxdcount = value; Changed(); } }
         public int MaxFileSizeMB { get => maxfs; set { maxfs = value; Changed(); } }
         public bool? SkipExistingFiles { get => skipef != null ? skipef : false; set { skipef = value; Changed(); } }
         public bool? SkipVideoFiles { get => skipvid != null ? skipvid : false; set { skipvid = value; Changed(); } }
+        public bool? MoveVideoFiles { get => movevid != null ? movevid : false; set { movevid = value; Changed(); } }
         public bool? ResizedOnly { get => resizeonly != null ? resizeonly : false; set { resizeonly = value; Changed(); } }
         public bool? ConcurrentDownloads { get => cd; set { cd = value; Changed(); } }
         public string DownloadLocation { get => location ?? "Click here to set it!"; set { location = value; Changed(); } }
@@ -43,6 +45,9 @@ namespace SankakuDownloader
         public bool CurrentlyDownloading { get; private set; } = false;
 
         public SankakuChannelClient Client { get; private set; } = new SankakuChannelClient();
+
+
+
         #endregion
 
         public MainViewModel()
@@ -73,6 +78,24 @@ namespace SankakuDownloader
         {
             CurrentlyDownloading = true;
             csrc = new CancellationTokenSource();
+
+            if (seperatelist != null && seperatelist?.Length > 0)
+            {
+                // check blacklisted tags
+                string[] seperateTagList = seperatelist.Split(' ').Select(x => x.ToLower()).ToArray();
+
+                foreach (var b in seperateTagList)
+                {
+                    var dir = Path.Combine(DownloadLocation, b);
+                    if (!Directory.Exists(dir))
+                    {
+                        Directory.CreateDirectory(dir);
+                    }
+                }
+
+            }
+
+            if (Directory.Exists(Path.Combine(DownloadLocation, "videos")) == false) Directory.CreateDirectory(Path.Combine(DownloadLocation, "videos"));
 
             try
             {
@@ -229,15 +252,67 @@ namespace SankakuDownloader
                                 task.Wait(csrc.Token);
                                 
                                 csrc.Token.ThrowIfCancellationRequested();
-                                if (oldcsrc != csrc) throw new OperationCanceledException("Token has changed!"); 
+                                if (oldcsrc != csrc) throw new OperationCanceledException("Token has changed!");
+                                #endregion
+
+
+                                #region Copy to tag folders
+
+                                bool fileMoved = false;
+                                if(MoveVideoFiles == true){
+                                    var ext = Path.GetExtension(targetDestination).Replace(".", "").ToLower();
+                                    var videoExtension = new string[] { "webm", "mp4", "avi", "flv", "swf" };
+                                    if (videoExtension.Contains(ext))
+                                    {
+                                        lock (padlockp)
+                                        {
+                                            var tagDestFolder = Path.Combine(DownloadLocation, "videos", p.FileName);
+                                            new FileInfo(targetDestination).MoveTo(tagDestFolder);
+                                            fileMoved = true;
+                                        }
+                                    }
+                                }
+                                if (seperatelist != null && seperatelist?.Length > 0 && !fileMoved)
+                                {
+                                    // check seperatelist tags
+                                    string[] seperateTagList = seperatelist.Split(' ').Select(x => x.ToLower()).ToArray();
+
+                                    foreach (var b in seperateTagList)
+                                    {
+                                        if (p.Tags.Count(x => x.Name.ToLower() == b) > 0)
+                                        {
+                                            lock (padlockp)
+                                            {
+                                                var tagDestFolder = Path.Combine(DownloadLocation, b, p.FileName);
+                                                if (!new FileInfo(tagDestFolder).Exists || SkipExistingFiles == false)
+                                                {
+                                                    Log($"Copied {p.FileName} to {tagDestFolder}. Tag {b} was found");
+                                                    new FileInfo(targetDestination).CopyTo(tagDestFolder);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                                 #endregion
 
                                 lock (padlockp)
                                 {
                                     pr = ++dprogress;
                                     downloaded++;
-                                    p.ActualFileSize = new FileInfo(targetDestination).Length;
-                                    Log($"{getProgress(pr)} Downloaded{(useSample ? " resized" : "")} '{p.FileName}' ({p.ActualFileSizeMB.ToString("0.00")} MB)", false, targetDestination);
+                                    if (!fileMoved)
+                                    {
+                                        p.ActualFileSize = new FileInfo(targetDestination).Length;
+                                        Log(
+                                            $"{getProgress(pr)} Downloaded{(useSample ? " resized" : "")} '{p.FileName}' ({p.ActualFileSizeMB.ToString("0.00")} MB)",
+                                            false, targetDestination);
+                                    }
+                                    else
+                                    {
+                                        p.ActualFileSize = new FileInfo(Path.Combine(DownloadLocation, "videos", p.FileName)).Length;
+                                        Log(
+                                            $"{getProgress(pr)} Downloaded{(useSample ? " resized" : "")} '{p.FileName}' ({p.ActualFileSizeMB.ToString("0.00")} MB)",
+                                            false, Path.Combine(DownloadLocation, "videos", p.FileName));
+                                    }
                                 }
                             }
 
@@ -387,6 +462,7 @@ namespace SankakuDownloader
                 serializer.Serialize(writer, new SaveData()
                 {
                     Blacklist = blacklist ?? "",
+                    SeperateList = seperatelist ?? "",
                     Query = query ?? "",
                     DownloadLocation = location,
                     MaxDownloadCount = maxdcount,
@@ -418,6 +494,7 @@ namespace SankakuDownloader
                 this.Username = save.Username;
                 this.MinScore = save.MinScore;
                 this.Blacklist = save.Blacklist;
+                this.Seperatelist = save.SeperateList;
                 this.ResizedOnly = save.ResizedOnly;
                 this.MinFavCount = save.MinFavCount;
                 this.StartingPage = save.StartingPage;
@@ -469,6 +546,7 @@ namespace SankakuDownloader
         public int Limit { get; set; }
         public string Query { get; set; }
         public string Blacklist { get; set; }
+        public string SeperateList { get; set; }
         public int MaxDownloadCount { get; set; }
         public int MaxFileSizeMB { get; set; }
         public bool SkipExistingFiles { get; set; }

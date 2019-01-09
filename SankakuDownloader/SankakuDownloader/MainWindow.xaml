@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SankakuDownloader"
         mc:Ignorable="d" DataContext="{StaticResource viewModel}"
-        Title="Sankaku Downloader" Height="600" MinWidth="600" MinHeight="450" Width="600" Closing="Window_Closing">
+        Title="Sankaku Downloader" Height="672" MinWidth="600" MinHeight="450" Width="600" Closing="Window_Closing">
     <Window.Resources>
         <Style TargetType="MenuItem" x:Key="fileMenuItem">
             <Style.Triggers>
@@ -26,7 +26,7 @@
             <PasswordBox x:Name="_password" HorizontalAlignment="Left" Margin="262,13,0,0" VerticalAlignment="Top" Width="144" Height="23"/>
             <Button x:Name="btnLogin" Content="Login" Margin="418,11,0,0" VerticalAlignment="Top" Height="25" HorizontalAlignment="Left" Width="80" Click="btnLogin_Click" IsDefault="True"/>
         </Grid>
-        <ListView x:Name="_list" ItemsSource="{Binding Logs}" Margin="10,278,10,46" Grid.ColumnSpan="2">
+        <ListView x:Name="_list" ItemsSource="{Binding Logs}" Margin="10,310,10,46" Grid.ColumnSpan="2">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
@@ -85,28 +85,32 @@
             </TextBlock.ContextMenu>
         </TextBlock>
 
-        <TextBlock Text="Starting page:" HorizontalAlignment="Left" Margin="10,157,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1"/>
+        <TextBlock Text="Starting page:" HorizontalAlignment="Left" Margin="10,194,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1"/>
         <TextBox x:Name="_startingPage" Text="{Binding StartingPage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" GotFocus="GotFocus"
-                 Height="23" Margin="10,178,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="88" Grid.Column="1" TabIndex="7"/>
+                 Height="23" Margin="10,215,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="88" Grid.Column="1" TabIndex="7"/>
 
-        <TextBlock Text="Posts per page:" HorizontalAlignment="Left" Margin="118,157,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1"/>
+        <TextBlock Text="Posts per page:" HorizontalAlignment="Left" Margin="118,194,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1"/>
         <TextBox x:Name="_limit" Text="{Binding Limit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" GotFocus="GotFocus"
-                 Height="23" Margin="118,178,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="88" Grid.Column="1" TabIndex="8"/>
+                 Height="23" Margin="118,215,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="88" Grid.Column="1" TabIndex="8"/>
 
-        <CheckBox x:Name="_checkSkipExisting" Content="Skip existing files" IsChecked="{Binding SkipExistingFiles, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" HorizontalAlignment="Left" Margin="10,108,0,0" VerticalAlignment="Top" TabIndex="5"/>
-        <CheckBox x:Name="_checkSkipVideo" Content="Skip video files" IsChecked="{Binding SkipVideoFiles, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" HorizontalAlignment="Left" Margin="10,125,0,0" VerticalAlignment="Top" TabIndex="6"/>
+        <CheckBox x:Name="_checkSkipExisting" Content="Skip existing files" IsChecked="{Binding SkipExistingFiles, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" HorizontalAlignment="Left" Margin="10,157,0,0" VerticalAlignment="Top" TabIndex="5"/>
+        <CheckBox x:Name="_checkSkipVideo" Content="Skip video files" IsChecked="{Binding SkipVideoFiles, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" HorizontalAlignment="Left" Margin="10,174,0,0" VerticalAlignment="Top" TabIndex="6"/>
 
-        <TextBlock Text="Min. score:" HorizontalAlignment="Left" Margin="10,207,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1"/>
+        <TextBlock Text="Min. score:" HorizontalAlignment="Left" Margin="10,244,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1"/>
         <TextBox x:Name="_minscore" Text="{Binding MinScore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" GotFocus="GotFocus"
-                 Height="23" Margin="10,228,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="88" Grid.Column="1" TabIndex="9"/>
+                 Height="23" Margin="10,265,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="88" Grid.Column="1" TabIndex="9"/>
 
-        <TextBlock Text="Min. fav. count:" HorizontalAlignment="Left" Margin="118,207,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1"/>
+        <TextBlock Text="Min. fav. count:" HorizontalAlignment="Left" Margin="118,244,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1"/>
         <TextBox x:Name="_minfavcount" Text="{Binding MinFavCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" GotFocus="GotFocus"
-                 Height="23" Margin="118,228,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="88" Grid.Column="1" TabIndex="10"/>
+                 Height="23" Margin="118,265,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="88" Grid.Column="1" TabIndex="10"/>
         <Button x:Name="btnStart" Content="Start Downloading" Grid.Column="1" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="133" Height="25" Click="btnStart_Click"/>
         <TextBlock x:Name="_loginStatus" HorizontalAlignment="Left" Margin="10,0,0,15" TextWrapping="Wrap" VerticalAlignment="Bottom" Text="{Binding LoginStatus}"/>
         <CheckBox Content="Concurrent Downloads" HorizontalAlignment="Right" Margin="0,0,162,15" x:Name="_checkboxConcurrent"
                   VerticalAlignment="Bottom" Grid.ColumnSpan="2" IsChecked="{Binding ConcurrentDownloads, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-        <CheckBox x:Name="_checkResizedOnly" Content="Resized Only" IsChecked="{Binding ResizedOnly, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" HorizontalAlignment="Left" Margin="133,108,-5,0" VerticalAlignment="Top" TabIndex="5"/>
+        <CheckBox x:Name="_checkResizedOnly" Content="Resized Only" IsChecked="{Binding ResizedOnly, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" HorizontalAlignment="Left" Margin="133,157,0,0" VerticalAlignment="Top" TabIndex="5"/>
+        <TextBlock Text="Seperate Tags:" HorizontalAlignment="Left" Margin="10,111,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1"/>
+        <TextBox x:Name="_seperatelist" Text="{Binding Seperatelist, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+            Height="23" Margin="10,132,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1" TabIndex="2"/>
+        <CheckBox x:Name="_checkMoveVideos" Content="Move video files" IsChecked="{Binding MoveVideoFiles, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" HorizontalAlignment="Left" Margin="133,174,0,0" VerticalAlignment="Top" TabIndex="6"/>
     </Grid>
 </Window>
