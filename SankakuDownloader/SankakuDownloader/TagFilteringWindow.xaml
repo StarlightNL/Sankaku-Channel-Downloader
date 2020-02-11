@@ -1,0 +1,29 @@
+﻿<Window x:Class="SankakuDownloader.TagFilteringWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SankakuDownloader"
+        mc:Ignorable="d"  DataContext="{StaticResource viewModel}"
+        Title="TagFilteringWindow" Height="450" Width="600">
+    <Grid>
+        <ListBox x:Name="libTagFilters" Height="419" VerticalAlignment="Top" ItemsSource="{Binding TagFilters}" Margin="0,0,200,0" SelectionChanged="libTagFilters_SelectionChanged"/>
+        <TextBlock Text="Foldername:" HorizontalAlignment="Left" Margin="397,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtFoldername" Text="" GotFocus="GotFocus"
+                 Height="23" Margin="397,31,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="174" TabIndex="3"/>
+
+        <TextBlock Text="Filtermethod:" HorizontalAlignment="Left" Margin="397,59,0,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
+        <ComboBox x:Name="cobMethod" Text="" Height="23" Margin="397,80,0,0"  VerticalAlignment="Top" HorizontalAlignment="Left" Width="174" TabIndex="3">
+            <ComboBoxItem>AND</ComboBoxItem>
+            <ComboBoxItem IsSelected="True">OR</ComboBoxItem>
+        </ComboBox>
+
+        <TextBlock Text="Tags:" HorizontalAlignment="Left" Margin="397,108,0,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtTags" Text="" GotFocus="GotFocus"
+                 Height="101" Margin="397,129,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="174" TabIndex="3"/>
+
+        <Button x:Name="btnCreate" Content="Create" Margin="397,246,0,0" VerticalAlignment="Top" Height="25" HorizontalAlignment="Left" Width="70" Click="btnCreate_Click" IsDefault="True"/>
+        <Button x:Name="btnEdit" Content="Edit" Margin="501,246,0,0" VerticalAlignment="Top" Height="25" HorizontalAlignment="Left" Width="70" Click="btnEdit_Click" IsDefault="True"/>
+        <Button x:Name="btnRemove" Content="Remove" Margin="397,276,0,0" VerticalAlignment="Top" Height="25" HorizontalAlignment="Left" Width="104" Click="btnRemove_Click" IsDefault="True"/>
+    </Grid>
+</Window>

@@ -18,7 +18,8 @@ namespace SankakuAPI
         public string PasswordHash { get; set; }
 
         #region Private Properties
-        const string BaseURL = "https://capi-beta.sankakucomplex.com";
+        // const string BaseURL = "https://capi-beta.sankakucomplex.com";
+        const string BaseURL = "https://capi-v2.sankakucomplex.com/";
         string AppKey { get; set; }
 
         string Credentials => PasswordHash == null ? "" : $"&login={HttpUtility.UrlEncode(Username)}&password_hash={PasswordHash}&appkey={AppKey}";
@@ -62,7 +63,8 @@ namespace SankakuAPI
             if (limit < 1) throw new NotSupportedException("Limit size must be at least 1");
 
             var tgs = HttpUtility.UrlEncode(query);
-            var response = await client.GetAsync($"/post/index.json?limit={limit}&page={page}&tags={tgs}{Credentials}");
+            // var response = await client.GetAsync($"/post/index.json?limit={limit}&page={page}&tags={tgs}{Credentials}");
+            var response = await client.GetAsync($"/posts?limit={limit}&page={page}&tags={tgs}{Credentials}");
 
             var content = await response.Content.ReadAsStringAsync();
             if (content.ToLower().Contains("anonymous users can only view")) throw new UnauthorizedAccessException("Sign in to view more pages!");

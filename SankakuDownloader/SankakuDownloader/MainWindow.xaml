@@ -108,9 +108,12 @@
         <CheckBox Content="Concurrent Downloads" HorizontalAlignment="Right" Margin="0,0,162,15" x:Name="_checkboxConcurrent"
                   VerticalAlignment="Bottom" Grid.ColumnSpan="2" IsChecked="{Binding ConcurrentDownloads, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         <CheckBox x:Name="_checkResizedOnly" Content="Resized Only" IsChecked="{Binding ResizedOnly, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" HorizontalAlignment="Left" Margin="133,157,0,0" VerticalAlignment="Top" TabIndex="5"/>
-        <TextBlock Text="Seperate Tags:" HorizontalAlignment="Left" Margin="10,111,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1"/>
-        <TextBox x:Name="_seperatelist" Text="{Binding Seperatelist, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-            Height="23" Margin="10,132,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1" TabIndex="2"/>
         <CheckBox x:Name="_checkMoveVideos" Content="Move video files" IsChecked="{Binding MoveVideoFiles, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" HorizontalAlignment="Left" Margin="133,174,0,0" VerticalAlignment="Top" TabIndex="6"/>
+
+
+        <!-- <TextBlock Text="Seperate Tags:" HorizontalAlignment="Left" Margin="10,111,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1"/> -->
+        <!-- <TextBox x:Name="_seperatelist" Text="{Binding Seperatelist, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  -->
+        <!--          Height="23" Margin="10,132,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1" TabIndex="2"/> -->
+        <Button x:Name="btnManageTagFiltering" Content="Manage Tag Filtering" Margin="10,120,0,0" VerticalAlignment="Top" Height="25" HorizontalAlignment="Left" Width="148" Click="btnManageTagFiltering_Click" IsDefault="True" Grid.Column="1"/>
     </Grid>
 </Window>

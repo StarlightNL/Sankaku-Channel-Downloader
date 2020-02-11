@@ -53,7 +53,6 @@ namespace SankakuDownloader
         void ToggleState(bool state)
         {
             _blacklist.IsEnabled = state;
-            _seperatelist.IsEnabled = state;
             _checkSkipExisting.IsEnabled = state;
             _checkSkipVideo.IsEnabled = state;
             _limit.IsEnabled = state;
@@ -196,6 +195,12 @@ namespace SankakuDownloader
         {
             if (ActiveViewModel.IsPathSet() == false) return;
             Process.Start(ActiveViewModel.DownloadLocation);
+        }
+
+        private void btnManageTagFiltering_Click(object sender, RoutedEventArgs e)
+        {
+            TagFilteringWindow window = new TagFilteringWindow();
+            window.Show();
         }
     }
 }

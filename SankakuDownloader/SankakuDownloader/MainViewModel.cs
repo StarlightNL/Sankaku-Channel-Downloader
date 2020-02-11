@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -8,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using Newtonsoft.Json;
 using SankakuAPI;
 
 namespace SankakuDownloader
@@ -42,6 +44,7 @@ namespace SankakuDownloader
         public int MinScore { get => minsc; set { minsc = value; Changed(); } }
         public int MinFavCount { get => minfc; set { minfc = value; Changed(); } }
         public ObservableCollection<LogItem> Logs { get; set; } = new ObservableCollection<LogItem>();
+        public ObservableCollection<TagFilter> TagFilters { get; set; } = new ObservableCollection<TagFilter>();
         public bool CurrentlyDownloading { get; private set; } = false;
 
         public SankakuChannelClient Client { get; private set; } = new SankakuChannelClient();
@@ -74,19 +77,19 @@ namespace SankakuDownloader
             }
         }
         public void LoadPasswordHash(string username, string phash) => Client = new SankakuChannelClient(username, phash);
+        
+
         public async Task StartDownloading()
         {
             CurrentlyDownloading = true;
             csrc = new CancellationTokenSource();
 
-            if (seperatelist != null && seperatelist?.Length > 0)
+            if (TagFilters != null && TagFilters?.Count > 0)
             {
-                // check blacklisted tags
-                string[] seperateTagList = seperatelist.Split(' ').Select(x => x.ToLower()).ToArray();
-
-                foreach (var b in seperateTagList)
+                // check filtering tags
+                foreach (var tagFilter in TagFilters)
                 {
-                    var dir = Path.Combine(DownloadLocation, b);
+                    var dir = Path.Combine(DownloadLocation, tagFilter.FolderName);
                     if (!Directory.Exists(dir))
                     {
                         Directory.CreateDirectory(dir);
@@ -165,6 +168,8 @@ namespace SankakuDownloader
                                     }
                                     return;
                                 }
+
+                                bool skipDownload = false;
                                 if (File.Exists(targetDestination))
                                 {
                                     // file with same filename exists - check size
@@ -177,7 +182,8 @@ namespace SankakuDownloader
                                             Log($"{getProgress(pr)} Skipped '{p.FileName}' ({p.FileSizeMB.ToString("0.00")} MB) - File exists",
                                                 false, targetDestination, true);
                                         }
-                                        return;
+
+                                        skipDownload = true;
                                     }
                                     else
                                     {
@@ -243,18 +249,22 @@ namespace SankakuDownloader
                                 }
                                 #endregion
 
+
                                 #region Download File
-                                // download data
+
                                 bool useSample = ResizedOnly == true && !string.IsNullOrEmpty(p.SampleUrl);
-                                var url = useSample ? p.SampleUrl : p.FileUrl;
+                                if (!skipDownload)
+                                {
+                                    // download data
+                                    var url = useSample ? p.SampleUrl : p.FileUrl;
 
-                                var task = Client.DownloadImage(url, targetDestination);
-                                task.Wait(csrc.Token);
-                                
-                                csrc.Token.ThrowIfCancellationRequested();
-                                if (oldcsrc != csrc) throw new OperationCanceledException("Token has changed!");
+                                    var task = Client.DownloadImage(url, targetDestination);
+                                    task.Wait(csrc.Token);
+
+                                    csrc.Token.ThrowIfCancellationRequested();
+                                    if (oldcsrc != csrc) throw new OperationCanceledException("Token has changed!");
+                                }
                                 #endregion
-
 
                                 #region Copy to tag folders
 
@@ -272,22 +282,48 @@ namespace SankakuDownloader
                                         }
                                     }
                                 }
-                                if (seperatelist != null && seperatelist?.Length > 0 && !fileMoved)
+                                
+                                if (TagFilters != null && TagFilters?.Count > 0 && !fileMoved)
                                 {
-                                    // check seperatelist tags
-                                    string[] seperateTagList = seperatelist.Split(' ').Select(x => x.ToLower()).ToArray();
-
-                                    foreach (var b in seperateTagList)
+                                    List<String> postTags = new List<String>();
+                                    foreach (var sankakuTag in p.Tags)
                                     {
-                                        if (p.Tags.Count(x => x.Name.ToLower() == b) > 0)
+                                        postTags.Add(sankakuTag.Name);
+                                    }
+                                    // check seperatelist tags
+                                    foreach (TagFilter tagFilter in TagFilters)
+                                    {
+                                        if (tagFilter.Method.ToUpper() == "OR")
                                         {
-                                            lock (padlockp)
+                                            if (tagFilter.Tags.Intersect(postTags).Any())
                                             {
-                                                var tagDestFolder = Path.Combine(DownloadLocation, b, p.FileName);
-                                                if (!new FileInfo(tagDestFolder).Exists || SkipExistingFiles == false)
+                                                lock (padlockp)
                                                 {
-                                                    Log($"Copied {p.FileName} to {tagDestFolder}. Tag {b} was found");
-                                                    new FileInfo(targetDestination).CopyTo(tagDestFolder);
+                                                    var tagDestFolder = Path.Combine(DownloadLocation, tagFilter.FolderName,
+                                                        p.FileName);
+                                                    if (!new FileInfo(tagDestFolder).Exists || SkipExistingFiles == false)
+                                                    {
+                                                        Log(
+                                                            $"Copied {p.FileName} to {tagDestFolder}. Tag {String.Join(" || ", tagFilter.Tags)} was found");
+                                                        new FileInfo(targetDestination).CopyTo(tagDestFolder);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else if (tagFilter.Method.ToUpper() == "AND")
+                                        {
+                                            if (tagFilter.Tags.Intersect(postTags).Count() == tagFilter.Tags.Count())
+                                            {
+                                                lock (padlockp)
+                                                {
+                                                    var tagDestFolder = Path.Combine(DownloadLocation, tagFilter.FolderName,
+                                                        p.FileName);
+                                                    if (!new FileInfo(tagDestFolder).Exists || SkipExistingFiles == false)
+                                                    {
+                                                        Log(
+                                                            $"Copied {p.FileName} to {tagDestFolder}. Tags {String.Join(" && ", tagFilter.Tags)} are all found");
+                                                        new FileInfo(targetDestination).CopyTo(tagDestFolder);
+                                                    }
                                                 }
                                             }
                                         }
@@ -459,10 +495,9 @@ namespace SankakuDownloader
             var serializer = new XmlSerializer(typeof(SaveData));
             using (var writer = new StreamWriter(path))
             {
-                serializer.Serialize(writer, new SaveData()
+                var saveData = new SaveData()
                 {
                     Blacklist = blacklist ?? "",
-                    SeperateList = seperatelist ?? "",
                     Query = query ?? "",
                     DownloadLocation = location,
                     MaxDownloadCount = maxdcount,
@@ -476,8 +511,10 @@ namespace SankakuDownloader
                     ResizedOnly = resizeonly == true,
                     StartingPage = spage,
                     Username = Client.Username,
-                    ConcurrentDownloads = ConcurrentDownloads == true
-                });
+                    ConcurrentDownloads = ConcurrentDownloads == true,
+                    TagFilters = JsonConvert.SerializeObject(TagFilters)
+                };
+                serializer.Serialize(writer, saveData);
             }
         }
         public void LoadData(string path)
@@ -494,7 +531,6 @@ namespace SankakuDownloader
                 this.Username = save.Username;
                 this.MinScore = save.MinScore;
                 this.Blacklist = save.Blacklist;
-                this.Seperatelist = save.SeperateList;
                 this.ResizedOnly = save.ResizedOnly;
                 this.MinFavCount = save.MinFavCount;
                 this.StartingPage = save.StartingPage;
@@ -505,6 +541,7 @@ namespace SankakuDownloader
                 this.MaxDownloadCount = save.MaxDownloadCount;
                 this.SkipExistingFiles = save.SkipExistingFiles;
                 this.ConcurrentDownloads = save.ConcurrentDownloads;
+                this.TagFilters = JsonConvert.DeserializeObject<ObservableCollection<TagFilter>>(save.TagFilters);
 
                 if (string.IsNullOrEmpty(save.PasswordHash) == false && string.IsNullOrEmpty(Username) == false)
                 {
@@ -556,6 +593,7 @@ namespace SankakuDownloader
         public string DownloadLocation { get; set; }
         public int MinScore { get; set; }
         public int MinFavCount { get; set; }
+        public String TagFilters { get; set; }
     }
 
     public class LogItem
