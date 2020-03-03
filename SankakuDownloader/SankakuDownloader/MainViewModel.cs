@@ -299,13 +299,18 @@ namespace SankakuDownloader
                                             {
                                                 lock (padlockp)
                                                 {
-                                                    var tagDestFolder = Path.Combine(DownloadLocation, tagFilter.FolderName,
-                                                        p.FileName);
-                                                    if (!new FileInfo(tagDestFolder).Exists || SkipExistingFiles == false)
+                                                    var tagDestFolder = Path.Combine(DownloadLocation, tagFilter.FolderName);
+                                                    var tagDestFile = Path.Combine(tagDestFolder, p.FileName);
+                                                    if (!new DirectoryInfo(tagDestFolder).Exists)
+                                                    {
+                                                        Log($"Didn't found the folder '{tagDestFolder}'. Creating it");
+                                                        new DirectoryInfo(tagDestFolder).Create();
+                                                    }
+                                                    if (!new FileInfo(tagDestFile).Exists || SkipExistingFiles == false)
                                                     {
                                                         Log(
-                                                            $"Copied {p.FileName} to {tagDestFolder}. Tag {String.Join(" || ", tagFilter.Tags)} was found");
-                                                        new FileInfo(targetDestination).CopyTo(tagDestFolder);
+                                                            $"Copied {p.FileName} to {tagDestFile}. Tag {String.Join(" || ", tagFilter.Tags)} was found");
+                                                        new FileInfo(targetDestination).CopyTo(tagDestFile);
                                                     }
                                                 }
                                             }

@@ -20,7 +20,7 @@
 
         <TextBlock Text="Tags:" HorizontalAlignment="Left" Margin="397,108,0,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
         <TextBox x:Name="txtTags" Text="" GotFocus="GotFocus"
-                 Height="101" Margin="397,129,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="174" TabIndex="3"/>
+                 Height="101" Margin="397,129,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="174" TabIndex="3" AcceptsReturn="True"/>
 
         <Button x:Name="btnCreate" Content="Create" Margin="397,246,0,0" VerticalAlignment="Top" Height="25" HorizontalAlignment="Left" Width="70" Click="btnCreate_Click" IsDefault="True"/>
         <Button x:Name="btnEdit" Content="Edit" Margin="501,246,0,0" VerticalAlignment="Top" Height="25" HorizontalAlignment="Left" Width="70" Click="btnEdit_Click" IsDefault="True"/>

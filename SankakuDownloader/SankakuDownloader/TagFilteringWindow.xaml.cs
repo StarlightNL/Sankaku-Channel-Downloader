@@ -33,8 +33,9 @@ namespace SankakuDownloader
         private void btnCreate_Click(object sender, RoutedEventArgs e)
         {
             List<String> tags = new List<string>();
-            if(String.IsNullOrWhiteSpace(txtTags.Text)) tags.Add(txtFoldername.Text);
-            else tags = txtTags.Text.Split(' ').ToList();
+            String txtTagsStr = txtTags.Text.Replace("\r\n", " ").Replace("\r", " ").Replace("\n", " ");
+            if (String.IsNullOrWhiteSpace(txtTagsStr)) tags.Add(txtFoldername.Text);
+            else tags = txtTagsStr.Split(' ').ToList();
 
             viewModel.TagFilters.Add(new TagFilter(){FolderName = txtFoldername.Text, Method = ((ComboBoxItem)cobMethod.SelectedItem).Content.ToString().ToLower(), Tags = tags});
 
