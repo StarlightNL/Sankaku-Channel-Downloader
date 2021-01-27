@@ -148,6 +148,11 @@ namespace SankakuDownloader
                             // local function for downloading a post
                             async Task downloadPost(SankakuPost p)
                             {
+                                if(p.FileName == null || (p.FileUrl == null || p.SampleUrl == null))
+                                {
+                                    Log($"Error! FileName of url is null for imageid {p.Id} ", true);
+                                    return;
+                                }
                                 int pr = 0;
                                 CancellationTokenSource oldcsrc = csrc;
 

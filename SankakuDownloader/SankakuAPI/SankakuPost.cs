@@ -10,6 +10,8 @@ namespace SankakuAPI
     {
         [JsonProperty("width")]
         public int Width { get; set; }
+        [JsonProperty("id")]
+        public int Id { get; set; }
         [JsonProperty("height")]
         public int Height { get; set; }
         [JsonProperty("sample_url")]

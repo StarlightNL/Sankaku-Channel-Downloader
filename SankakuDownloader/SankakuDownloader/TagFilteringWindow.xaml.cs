@@ -77,6 +77,7 @@ namespace SankakuDownloader
 
                 btnRemove.IsEnabled = true;
                 btnEdit.IsEnabled = true;
+                btnCreate.IsEnabled = false;
                 txtFoldername.IsEnabled = false;
             } catch(Exception){}
         }
